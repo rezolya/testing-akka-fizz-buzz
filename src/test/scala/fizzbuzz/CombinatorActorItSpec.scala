@@ -40,7 +40,26 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
     }
 
     "correctly combine the results for number 15" in {
-      ???
+      val fizzProbe = TestProbe("fizzActor")
+      val buzzProbe = TestProbe("buzzActor")
+
+      val props: Props = CombinatorActor.props(Some(fizzProbe.ref), Some(buzzProbe.ref))
+      val combinatorActor = system.actorOf(props)
+
+      val fizzActor = system.actorOf(Props[FizzActor])
+      val buzzActor = system.actorOf(Props[BuzzActor])
+
+      combinatorActor ! 15
+
+      val correctMessageReceived: PartialFunction[Any, Unit] = {
+        case r: Request => r.number should be(15)
+      }
+      fizzProbe.expectMsgPF()(correctMessageReceived)
+      fizzProbe.forward(fizzActor)
+      buzzProbe.expectMsgPF()(correctMessageReceived)
+      fizzProbe.forward(buzzActor)
+
+      expectMsgAnyOf("FizzBuzz", "BuzzFizz")
     }
   }
 }
