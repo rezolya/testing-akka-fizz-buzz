@@ -9,6 +9,7 @@ class BuzzActorSpec extends TestKit(ActorSystem("TestSystem"))
   with WordSpecLike
   with Matchers
   with StopSystemAfterAll
+  with ImplicitSender
 {
   //TODO: 2. test actor with telling syncronously
   "BuzzActor" should {
