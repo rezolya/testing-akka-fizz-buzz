@@ -2,7 +2,7 @@ package fizzbuzz
 
 import akka.actor.Actor
 
-class BuzzActor extends Actor {
+class BuzzActor extends Actor with Divisibility {
   import FizzBuzzMessages._
 
   def receive = {
@@ -14,9 +14,5 @@ class BuzzActor extends Actor {
         sender() ! Reply(Left(num), r)
       }
     case _ => context.parent ! "unknown message type"
-  }
-
-  def isDivisibleByFive (num: Int): Boolean = {
-    num % 5 == 0
   }
 }

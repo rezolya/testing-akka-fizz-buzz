@@ -3,7 +3,7 @@ package fizzbuzz
 import akka.actor.Actor
 import fizzbuzz.FizzBuzzMessages.{Request, Reply}
 
-class FizzActor extends Actor {
+class FizzActor extends Actor with Divisibility {
   def receive = {
     case r @ Request(num, _, _) =>
       if(isDivisibleByThree(num))
@@ -11,9 +11,5 @@ class FizzActor extends Actor {
       else
         sender() ! Reply(Left(num), r)
     case _ => sender() ! "unknown message type"
-  }
-
-  def isDivisibleByThree (num: Int): Boolean = {
-    num % 3 == 0
   }
 }
