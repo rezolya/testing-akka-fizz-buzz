@@ -4,17 +4,18 @@ import akka.actor.{Props, ActorLogging, Actor}
 import fizzbuzz.CombinatorActor.GetPending
 
 object CombinatorActor {
-  def props() = Props[CombinatorActor]
+  def props(fizzProps: Props, buzzProps: Props) =
+    Props(new CombinatorActor(fizzProps, buzzProps))
 
   case class GetPending()
 }
 
-class CombinatorActor extends Actor
+class CombinatorActor(fizzProps: Props, buzzProps: Props) extends Actor
   with ActorLogging with Utils {
   import fizzbuzz.FizzBuzzMessages._
 
-  val fizzChild = context.actorOf(Props[FizzActor])
-  val buzzChild = context.actorOf(Props[BuzzActor])
+  val fizzChild = context.actorOf(fizzProps)
+  val buzzChild = context.actorOf(buzzProps)
 
   var seqNum = 0
   var pending = Map[Request, Option[Reply]]()
