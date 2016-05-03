@@ -43,7 +43,15 @@ class FizzActorSpec extends TestKit(ActorSystem("TestSystem"))
 
     //TODO: 1.test actor with asking synchronously
     "reply with original number if it is not divisible by 3" in {
-      ???
+      val actorRef = TestActorRef(new FizzActor)
+      implicit val timeout = Timeout(5 seconds)
+      val request = Request(5, null, 1)
+
+      val future = actorRef ? request
+      val futureResult = future.value.get
+
+      val expectedReply = Reply(Left(5), request)
+      futureResult should be(Success(expectedReply))
     }
   }
 }
