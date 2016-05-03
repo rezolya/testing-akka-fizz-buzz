@@ -1,19 +1,24 @@
 package fizzbuzz
 
-import akka.actor.Actor
+import akka.actor.{Props, ActorRef, Actor}
 
-class BuzzActor extends Actor {
+object BuzzActor {
+  def props(parent: ActorRef) = Props(classOf[BuzzActor], parent)
+}
+
+class BuzzActor(parent: ActorRef) extends Actor {
   import FizzBuzzMessages._
 
   def receive = {
     case r @ Request(num, _, _) =>
       if(isDivisibleByFive(num)){
-        sender() ! Reply(Right("Buzz"), r)
+        parent ! Reply(Right("Buzz"), r)
       }
       else {
-        sender() ! Reply(Left(num), r)
+        parent ! Reply(Left(num), r)
       }
-    case _ => context.parent ! "unknown message type"
+    case x: Any =>
+      parent ! UnknownMessageType(x.toString)
   }
 
   def isDivisibleByFive (num: Int): Boolean = {

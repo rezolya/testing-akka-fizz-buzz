@@ -13,8 +13,8 @@ class CombinatorActor extends Actor
   with ActorLogging with Utils {
   import fizzbuzz.FizzBuzzMessages._
 
-  val fizzChild = context.actorOf(Props[FizzActor])
-  val buzzChild = context.actorOf(Props[BuzzActor])
+  val fizzChild = context.actorOf(FizzActor.props(self))
+  val buzzChild = context.actorOf(BuzzActor.props(self))
 
   var seqNum = 0
   var pending = Map[Request, Option[Reply]]()
