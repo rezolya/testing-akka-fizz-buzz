@@ -13,7 +13,8 @@ class BuzzActor extends Actor {
       else {
         context.parent ! Reply(Left(num), r)
       }
-    case _ => context.parent ! "unknown message type"
+    case x: Any =>
+      context.parent ! UnknownMessageType(x.toString)
   }
 
   def isDivisibleByFive (num: Int): Boolean = {

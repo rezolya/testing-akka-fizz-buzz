@@ -2,7 +2,7 @@ package fizzbuzz
 
 import akka.actor.{Actor, Props, ActorSystem}
 import akka.testkit.{TestProbe, ImplicitSender, TestActorRef, TestKit}
-import fizzbuzz.FizzBuzzMessages.{Reply, Request}
+import fizzbuzz.FizzBuzzMessages.{UnknownMessageType, Reply, Request}
 import org.scalatest.{Matchers, WordSpecLike}
 
 class BuzzActorItSpec extends TestKit(ActorSystem("TestSystem"))
@@ -38,8 +38,7 @@ class BuzzActorItSpec extends TestKit(ActorSystem("TestSystem"))
     "notify its parent if it receives unexpected message" in {
       proxyActor.send(parentActor, "do something")
 
-      val expectedReply = Reply(Right("Buzz"), null)
-      proxyActor.expectMsg(expectedReply)
+      proxyActor.expectMsg(UnknownMessageType("do something"))
     }
   }
 }
