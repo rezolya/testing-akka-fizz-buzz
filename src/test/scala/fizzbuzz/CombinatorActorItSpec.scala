@@ -16,29 +16,31 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
   with ImplicitSender
 {
   "Combinator actor" should {
-    "store the pending requests" in {
-      val props: Props = CombinatorActor.props()
+    "ask fizz and buzz actors to check the number and combine the results" in {
+      val fizzProbe = TestProbe("fizzActor")
+      val buzzProbe = TestProbe("buzzActor")
+
+      val props: Props = CombinatorActor.props(Some(fizzProbe.ref), Some(buzzProbe.ref))
       val combinatorActor = system.actorOf(props)
 
-      combinatorActor ! 4
-      combinatorActor ! GetPending
+      val fizzActor = system.actorOf(Props[FizzActor])
+      val buzzActor = system.actorOf(Props[BuzzActor])
 
-      expectMsgPF(){
-        case pending: Map[Request, Option[Reply]] =>
-          pending.size should be(1)
-          pending.head._2 should be(None)
+      combinatorActor ! 5
+
+      val correctMessageReceived: PartialFunction[Any, Unit] = {
+        case r: Request => r.number should be(5)
       }
+      fizzProbe.expectMsgPF()(correctMessageReceived)
+      fizzProbe.forward(fizzActor)
+      buzzProbe.expectMsgPF()(correctMessageReceived)
+      fizzProbe.forward(buzzActor)
 
-      //OR:
-      //val request = Request(4, testActor, 0)
-      //val expectedPending = Map(request -> None )
-      //expectMsg(expectedPending)
+      expectMsg("Buzz")
+    }
 
-      //OR:
-      //val message = fizzProbe.expectMsgClass(Request.getClass) //NOT: classOf[Request]
-      //message.size should be(1)
-      //message.head._2 should be(None)
-
+    "correctly combine the results for number 15" in {
+      ???
     }
   }
 }

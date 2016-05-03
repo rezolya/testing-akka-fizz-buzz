@@ -1,20 +1,23 @@
 package fizzbuzz
 
-import akka.actor.{Props, ActorLogging, Actor}
+import akka.actor.{ActorRef, Props, ActorLogging, Actor}
 import fizzbuzz.CombinatorActor.GetPending
 
 object CombinatorActor {
-  def props() = Props[CombinatorActor]
+  def props(fizzActor: Option[ActorRef] = None, buzzActor: Option[ActorRef] = None) =
+    Props(new CombinatorActor(fizzActor, buzzActor))
 
   case class GetPending()
 }
 
-class CombinatorActor extends Actor
+class CombinatorActor(fizzActor: Option[ActorRef],
+                      buzzActor: Option[ActorRef])
+  extends Actor
   with ActorLogging with Utils {
   import fizzbuzz.FizzBuzzMessages._
 
-  val fizzChild = context.actorOf(Props[FizzActor])
-  val buzzChild = context.actorOf(Props[BuzzActor])
+  val fizzChild = fizzActor.getOrElse(context.actorOf(Props[FizzActor]))
+  val buzzChild = buzzActor.getOrElse(context.actorOf(Props[BuzzActor]))
 
   var seqNum = 0
   var pending = Map[Request, Option[Reply]]()
