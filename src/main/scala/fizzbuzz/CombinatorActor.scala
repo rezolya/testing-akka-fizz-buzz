@@ -1,9 +1,12 @@
 package fizzbuzz
 
 import akka.actor.{Props, ActorLogging, Actor}
+import fizzbuzz.CombinatorActor.GetPending
 
 object CombinatorActor {
   def props() = Props[CombinatorActor]
+
+  case class GetPending()
 }
 
 class CombinatorActor extends Actor
@@ -41,5 +44,6 @@ class CombinatorActor extends Actor
           pending = pending - request // remove processed request
       }
     }
+    case GetPending => sender() ! pending
   }
 }
