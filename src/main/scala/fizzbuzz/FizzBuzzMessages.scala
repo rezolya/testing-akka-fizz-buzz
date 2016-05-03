@@ -7,4 +7,5 @@ object FizzBuzzMessages {
   type Answer = Either[Int, String]
   case class Reply(answer: Answer, request: Request)
   case class Request(number: Int, sender: ActorRef, seqNum: Int)
+  case class UnknownMessageType(message: String)
 }

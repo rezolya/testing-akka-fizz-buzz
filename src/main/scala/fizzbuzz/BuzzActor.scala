@@ -8,12 +8,13 @@ class BuzzActor extends Actor {
   def receive = {
     case r @ Request(num, _, _) =>
       if(isDivisibleByFive(num)){
-        sender() ! Reply(Right("Buzz"), r)
+        context.parent ! Reply(Right("Buzz"), r)
       }
       else {
-        sender() ! Reply(Left(num), r)
+        context.parent ! Reply(Left(num), r)
       }
-    case _ => context.parent ! "unknown message type"
+    case x: Any =>
+      context.parent ! UnknownMessageType(x.toString)
   }
 
   def isDivisibleByFive (num: Int): Boolean = {
