@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 import scala.util.Success
 
 /*
-  This test is signle-threaded
+  This test is single-threaded
  */
 class FizzActorSpec extends TestKit(ActorSystem("TestSystem"))
   with WordSpecLike
@@ -39,6 +39,11 @@ class FizzActorSpec extends TestKit(ActorSystem("TestSystem"))
 
       val expectedReply = Reply(Right("Fizz"), request)
       futureResult should be(Success(expectedReply))
+    }
+
+    //TODO: 1.test actor with asking synchronously
+    "reply with original number if it is not divisible by 3" in {
+      ???
     }
   }
 }
