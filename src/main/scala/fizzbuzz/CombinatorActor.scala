@@ -31,6 +31,7 @@ class CombinatorActor extends Actor
       seqNum = seqNum + 1
     }
     case reply @ Reply(answer, request) => {
+      log.info(s"Received reply: $reply")
       val previousReplyOpt = pending.get(request) match {
         case Some(option) => option
         case None => throw new Exception(s"Unexpected reply received: $reply")

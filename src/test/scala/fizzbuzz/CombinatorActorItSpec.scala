@@ -38,7 +38,15 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
       //val message = fizzProbe.expectMsgClass(Request.getClass) //NOT: classOf[Request]
       //message.size should be(1)
       //message.head._2 should be(None)
+    }
 
+    //TODO: 1. Implement the tests in a multi-threaded way
+    "update pending request after receiving one reply" in {
+      ???
+    }
+
+    "remove the processed request from pending" in {
+      ???
     }
   }
 }
