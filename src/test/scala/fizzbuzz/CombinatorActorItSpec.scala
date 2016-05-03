@@ -29,6 +29,8 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
           pending.head._2 should be(None)
       }
 
+      expectMsg(4)
+
       //OR:
       //val request = Request(4, testActor, 0)
       //val expectedPending = Map(request -> None )
@@ -42,7 +44,26 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
 
     //TODO: 1. Implement the tests in a multi-threaded way
     "update pending request after receiving one reply" in {
-      ???
+      val props: Props = CombinatorActor.props()
+      val combinatorActor = system.actorOf(props)
+
+      combinatorActor ! 4
+      combinatorActor ! GetPending
+
+      val request = expectMsgPF(){
+        case pending: Map[Request, Option[Reply]] =>
+          pending.head._1
+      }
+
+      combinatorActor ! Reply(Left(4), request)
+      combinatorActor ! GetPending
+
+      expectMsgPF() {
+        case pending: Map[Request, Option[Reply]] =>
+          pending.head._2 should be(Some(Reply(Left(4), request)))
+      }
+
+      expectMsg(4)
     }
 
     "remove the processed request from pending" in {
