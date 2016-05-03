@@ -23,7 +23,13 @@ class BuzzActorItSpec extends TestKit(ActorSystem("TestSystem"))
     }
 
     "send the reply to the parent no matter where the request came from" in {
-      ???
+      val parentActor = TestProbe()
+      val buzzActor = system.actorOf(BuzzActor.props(parentActor.ref))
+
+      val request = Request(15, self, 2)
+      buzzActor ! request
+
+      parentActor.expectMsg(Reply(Right("Buzz"), request))
     }
   }
 
