@@ -1,7 +1,7 @@
 package fizzbuzz
 
-import akka.actor.{ActorSystem, Props}
-import akka.testkit.{ImplicitSender, TestActorRef, TestKit, TestProbe}
+import akka.actor.{ActorRef, ActorRefFactory, ActorSystem, Props}
+import akka.testkit._
 import fizzbuzz.CombinatorActor.GetPending
 import fizzbuzz.FizzBuzzMessages.{Reply, Request}
 import org.scalatest.{Matchers, WordSpecLike}
@@ -16,29 +16,51 @@ class CombinatorActorItSpec extends TestKit(ActorSystem("TestSystem"))
   with ImplicitSender
 {
   "Combinator actor" should {
-    "store the pending requests" in {
-      val props: Props = CombinatorActor.props()
-      val combinatorActor = system.actorOf(props)
+    val fizzProbe = TestProbe("fizzActor")
+    val buzzProbe = TestProbe("buzzActor")
 
-      combinatorActor ! 4
-      combinatorActor ! GetPending
+    val fizzMaker = (_: ActorRefFactory) => fizzProbe.ref
+    val buzzMaker = (_: ActorRefFactory) => buzzProbe.ref
 
-      expectMsgPF(){
-        case pending: Map[Request, Option[Reply]] =>
-          pending.size should be(1)
-          pending.head._2 should be(None)
+    val props: Props = CombinatorActor.props(fizzMaker, buzzMaker)
+    val combinatorActor = system.actorOf(props)
+
+    "ask fizz and buzz actors to check the number" in {
+      combinatorActor ! 5
+
+      val correctMessageReceived: PartialFunction[Any, Unit] = {
+        case r: Request => r.number should be(5)
       }
+      fizzProbe.expectMsgPF()(correctMessageReceived)
+      buzzProbe.expectMsgPF()(correctMessageReceived)
+    }
 
-      //OR:
-      //val request = Request(4, testActor, 0)
-      //val expectedPending = Map(request -> None )
-      //expectMsg(expectedPending)
+    "combine answers correctly" in {
+      fizzProbe.setAutoPilot(new TestActor.AutoPilot {
+        def run(sender: ActorRef, msg: Any) =
+          msg match {
+            case r: Request =>
+              sender ! Reply(Left(5), r)
+              TestActor.KeepRunning
+            case "stop" => TestActor.NoAutoPilot
+          }
+      })
+      buzzProbe.setAutoPilot(new TestActor.AutoPilot {
+        def run(sender: ActorRef, msg: Any) =
+          msg match {
+            case r: Request =>
+              sender ! Reply(Right("Buzz"), r)
+              TestActor.KeepRunning
+            case "stop" => TestActor.NoAutoPilot
+          }
+      })
+      combinatorActor ! 5
+      expectMsg("Buzz")
+      combinatorActor ! 10
+      expectMsg("Buzz")
 
-      //OR:
-      //val message = fizzProbe.expectMsgClass(Request.getClass) //NOT: classOf[Request]
-      //message.size should be(1)
-      //message.head._2 should be(None)
-
+      fizzProbe.ref ! "stop"
+      buzzProbe.ref ! "stop"
     }
   }
 }
